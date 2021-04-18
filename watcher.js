@@ -1,4 +1,5 @@
 const axios = require('axios')
+const querystring = require('querystring');
 
 const token = "YOUR TOKEN"
 
@@ -79,13 +80,14 @@ const checkCommission = async (users) => {
         const commission = db[user].commission
         const landInfo = await getLandInfo(landId)
         if(landInfo.commission !== commission) {
-            console.log(`${user} mining on land ${landId}: Commission changed! ${commission}} => ${landIngo.commission}`)
+            console.log(`${user} mining on land ${landId}: Commission changed! ${commission}} => ${landInfo.commission}`)
             console.log(`[${landId}]: ${db[user].name}(${db[user].x},${db[user].y}) | Commission: ${landInfo.commission}%`)
-            await notifyLine(`${user} mining on land ${landId}: Commission changed! ${commission}} => ${landIngo.commission}\n[${landId}]: ${db[user].name}(${db[user].x},${db[user].y}) | Commission: ${landInfo.commission}%`)
+            await notifyLine(`${user} mining on land ${landId}: Commission changed! ${commission}} => ${landInfo.commission}\n[${landId}]: ${db[user].name}(${db[user].x},${db[user].y}) | Commission: ${landInfo.commission}%`)
             db[user].commission = landInfo.commission
         } else {
             console.log(`${user} mining on land ${landId}: Commission ok!`)
             console.log(`[${landId}]: ${db[user].name}(${db[user].x},${db[user].y}) | Commission: ${landInfo.commission}%`)
+            //await notifyLine(`${user} mining on land ${landId}\n[${landId}]: ${db[user].name}(${db[user].x},${db[user].y}) | Commission: ${landInfo.commission}%`)
         }
     }
 }
