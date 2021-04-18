@@ -7,6 +7,8 @@ const db = {}
 //define accounts here (multiple accounts is accepted!)
 const accounts = ["account1", "account2"]
 
+const cooldownTime = 15 * 60 * 1000 // check every 15 min
+
 const notifyLine = async (message) => {
     await axios({
         method: "POST",
@@ -86,14 +88,13 @@ const initializeData = async (users) => {
 }
 
 const runloop = async () => {
-    await initializeData(accounts)
-    while (true) {
-        setTimeout(async () => {
-            console.log(`Checking on ${new Date()}`)
-            await checkCommission(accounts)
-        }, 20 * 60 * 1000) //every 20 min check
-    }
-    
+    console.log(`Checking on ${new Date()}`)
+    await checkCommission(accounts)
+    console.log(`Next Checking Time on ${new Date(new Date().getTime() + cooldownTime)}`)
+    setTimeout(runloop, cooldownTime) //every 20 min check
 }
 
-runloop()
+(async () => {
+    await initializeData(accounts)
+    runloop()
+})()
