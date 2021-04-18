@@ -17,13 +17,15 @@ const notifyLine = async (message) => {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': `Bearer ${token}`
         },
-        data: `message=${message}`
+        data: querystring.stringify({
+            message: `${message}`,
+        })
     })
     .then(function(response) {
         console.log(response.data)
     })
     .catch(function(error) {
-        console.log(error)
+        console.log(error.data)
     })
 }
 
