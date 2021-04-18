@@ -87,7 +87,7 @@ const initializeData = async (users) => {
 
 const runloop = async () => {
     await initializeData(accounts)
-    while (True) {
+    while (true) {
         setTimeout(async () => {
             console.log(`Checking on ${new Date()}`)
             await checkCommission(accounts)
