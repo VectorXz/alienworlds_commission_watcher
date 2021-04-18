@@ -35,7 +35,6 @@ const getLand = async (user) => {
             console.log("Miner not found!")
             return "MINER_NOT_FOUND"
         }
-        //console.log(data.rows[0].current_land)
         return data.rows[0].current_land
     }).catch((err) => {
         console.log("Cannot get land!")
@@ -64,13 +63,27 @@ const getLandInfo = async (landId) => {
 const checkCommission = async (users) => {
     for (let user of users) {
         const landId = db[user].landId
+        const checkLandId = await getLand(user)
+        if(landId !== checkLandId) {
+            console.log("Land ID changed!")
+            const newLandInfo = await getLandInfo(checkLandId)
+            newLandInfo["landId"] = checkLandId
+            db[user] = newLandInfo
+            console.log(`${user} changed mining land from ${landId} to ${checkLandId}`)
+            console.log(`[${db[user].landId}]: ${db[user].name}(${db[user].x},${db[user].y}) | Commission: ${db[user].commission}%`)
+            await notifyLine(`${user} changed mining land from ${landId} to ${checkLandId}\n[${db[user].landId}]: ${db[user].name}(${db[user].x},${db[user].y}) | Commission: ${db[user].commission}%`)
+            continue
+        }
         const commission = db[user].commission
         const landInfo = await getLandInfo(landId)
         if(landInfo.commission !== commission) {
             console.log(`${user} mining on land ${landId}: Commission changed! ${commission}} => ${landIngo.commission}`)
-            await notifyLine(`${user} mining on land ${landId}: Commission changed! ${commission}} => ${landIngo.commission}`)
+            console.log(`[${landId}]: ${db[user].name}(${db[user].x},${db[user].y}) | Commission: ${landInfo.commission}%`)
+            await notifyLine(`${user} mining on land ${landId}: Commission changed! ${commission}} => ${landIngo.commission}\n[${landId}]: ${db[user].name}(${db[user].x},${db[user].y}) | Commission: ${landInfo.commission}%`)
+            db[user].commission = landInfo.commission
         } else {
             console.log(`${user} mining on land ${landId}: Commission ok!`)
+            console.log(`[${landId}]: ${db[user].name}(${db[user].x},${db[user].y}) | Commission: ${landInfo.commission}%`)
         }
     }
 }
@@ -78,6 +91,10 @@ const checkCommission = async (users) => {
 const initializeData = async (users) => {
     for(let user of users) {
         const userLandId = await getLand(user)
+        if (userLandId === "MINER_NOT_FOUND") {
+            console.log(`Miner ${user} not found!`)
+            continue
+        }
         const landInfo = await getLandInfo(userLandId)
         //console.log(landInfo)
         landInfo["landId"] = userLandId
@@ -91,7 +108,7 @@ const runloop = async () => {
     console.log(`Checking on ${new Date()}`)
     await checkCommission(accounts)
     console.log(`Next Checking Time on ${new Date(new Date().getTime() + cooldownTime)}`)
-    setTimeout(runloop, cooldownTime) //every 20 min check
+    setTimeout(runloop, cooldownTime)
 }
 
 (async () => {
